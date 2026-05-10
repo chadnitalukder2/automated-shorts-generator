@@ -40,10 +40,13 @@ async function renderVideo(props, outputDir, durationSeconds, jobId) {
     const fps = config.video.fps;
     const durationInFrames = Math.round(durationSeconds * fps);
 
+    const browserExecutable = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_BIN || null;
+
     const composition = await selectComposition({
       serveUrl: bundleUrl,
       id: 'CricketShort',
       inputProps: props,
+      browserExecutable,
     });
 
     const outputPath = path.join(outputDir, 'base-video.mp4');
@@ -60,10 +63,10 @@ async function renderVideo(props, outputDir, durationSeconds, jobId) {
       codec: 'h264',
       outputLocation: outputPath,
       inputProps: props,
+      browserExecutable,
       chromiumOptions: {
         disableWebSecurity: true,
         headless: true,
-        // Required for Railway / Docker / Linux containers (no sandbox)
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
       },
       onProgress: ({ progress }) => {
