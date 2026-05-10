@@ -20,6 +20,8 @@ async function startWorker() {
     {
       connection,
       concurrency: config.queue.concurrency,
+      lockDuration: 300000,   // 5 min — covers full render+upload pipeline
+      lockRenewTime: 60000,   // renew lock every 60s
     }
   );
 
