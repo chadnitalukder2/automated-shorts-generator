@@ -1,0 +1,56 @@
+{
+  "name": "automated-shorts-generator",
+  "version": "1.0.0",
+  "description": "Automated viral cricket shorts generator with AI script, TTS, Remotion, and YouTube upload",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "worker": "node src/queue/workers.js",
+    "test": "node scripts/test-pipeline.js",
+    "trigger": "node scripts/trigger.js",
+    "studio": "npx remotion studio src/remotion/index.jsx",
+    "lint": "eslint src/ --ext .js,.jsx",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.35.0",
+    "@bull-board/api": "^7.0.0",
+    "@bull-board/express": "^7.0.0",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@google/generative-ai": "^0.24.1",
+    "@remotion/bundler": "^4.0.285",
+    "@remotion/renderer": "^4.0.285",
+    "axios": "^1.7.9",
+    "bullmq": "^5.34.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "fluent-ffmpeg": "^2.1.3",
+    "fs-extra": "^11.2.0",
+    "googleapis": "^144.0.0",
+    "groq-sdk": "^1.1.2",
+    "ioredis": "^5.4.1",
+    "msedge-tts": "^1.3.4",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^3.3.2",
+    "p-retry": "^4.6.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.285",
+    "uuid": "^11.0.4",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.17.0",
+    "nodemon": "^3.1.7"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

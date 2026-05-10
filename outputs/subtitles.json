@@ -1,0 +1,66 @@
+[
+  {
+    "index": 1,
+    "text": "India smash Australia by",
+    "startMs": 0,
+    "endMs": 6897,
+    "startFrame": 0,
+    "endFrame": 207
+  },
+  {
+    "index": 2,
+    "text": "6 wickets. Rohit Sharma",
+    "startMs": 6897,
+    "endMs": 13793,
+    "startFrame": 207,
+    "endFrame": 414
+  },
+  {
+    "index": 3,
+    "text": "hits a stunning century.",
+    "startMs": 13793,
+    "endMs": 20690,
+    "startFrame": 414,
+    "endFrame": 621
+  },
+  {
+    "index": 4,
+    "text": "This is cricket at",
+    "startMs": 20690,
+    "endMs": 27586,
+    "startFrame": 621,
+    "endFrame": 828
+  },
+  {
+    "index": 5,
+    "text": "its finest. The crowd",
+    "startMs": 27586,
+    "endMs": 34483,
+    "startFrame": 828,
+    "endFrame": 1034
+  },
+  {
+    "index": 6,
+    "text": "goes absolutely wild. Subscribe",
+    "startMs": 34483,
+    "endMs": 41379,
+    "startFrame": 1034,
+    "endFrame": 1241
+  },
+  {
+    "index": 7,
+    "text": "for more viral cricket",
+    "startMs": 41379,
+    "endMs": 48276,
+    "startFrame": 1241,
+    "endFrame": 1448
+  },
+  {
+    "index": 8,
+    "text": "moments!",
+    "startMs": 48276,
+    "endMs": 50000,
+    "startFrame": 1448,
+    "endFrame": 1500
+  }
+]
