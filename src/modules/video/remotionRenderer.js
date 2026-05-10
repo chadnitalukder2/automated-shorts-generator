@@ -67,7 +67,16 @@ async function renderVideo(props, outputDir, durationSeconds, jobId) {
       chromiumOptions: {
         disableWebSecurity: true,
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-crash-reporter',
+          '--no-zygote',
+          '--disable-gpu',
+          '--no-first-run',
+          '--single-process',
+        ],
       },
       onProgress: ({ progress }) => {
         const pct = Math.round(progress * 100);
