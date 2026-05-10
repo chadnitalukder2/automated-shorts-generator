@@ -5,15 +5,12 @@ FROM node:20-slim AS base
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # FFmpeg for video processing
     ffmpeg \
-    # Chromium for Remotion headless rendering
-    chromium \
-    chromium-sandbox \
     # TTS fallback for when Edge TTS is unavailable
     espeak-ng \
     # Font support for subtitle rendering
     fonts-liberation \
     fonts-noto \
-    # Required by Puppeteer/Chromium
+    # Required by Remotion Chrome Headless Shell
     libnss3 \
     libnspr4 \
     libatk1.0-0 \
@@ -30,11 +27,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
-
-# Tell Remotion/Puppeteer to use system Chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV CHROME_BIN=/usr/bin/chromium
 
 WORKDIR /app
 
@@ -65,6 +57,9 @@ RUN mkdir -p outputs/jobs outputs/logs && \
     chown -R appuser:appuser /app
 
 USER appuser
+
+# Pre-download Remotion's Chrome Headless Shell so it's baked into the image
+RUN node -e "const {ensureBrowser} = require('@remotion/renderer'); ensureBrowser().then(r => console.log('Chrome ready:', r.path)).catch(e => { console.error(e); process.exit(1); })"
 
 EXPOSE 3000
 
