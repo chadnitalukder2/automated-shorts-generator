@@ -106,7 +106,7 @@ async function generateSystemTTS(text, outputDir, jobId) {
   } else if (platform === 'linux') {
     const wavPath = path.join(outputDir, 'audio.wav');
     await new Promise((resolve, reject) => {
-      const proc = spawn('espeak', ['-s', '160', '-w', wavPath, text]);
+      const proc = spawn('espeak-ng', ['-s', '160', '-w', wavPath, text]);
       proc.on('close', (code) => code === 0 ? resolve() : reject(new Error(`espeak exited ${code}`)));
       proc.on('error', reject);
     });
