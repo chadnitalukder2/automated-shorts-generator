@@ -112,7 +112,6 @@ async function main() {
   <div class="card">
     <h2>Links</h2>
     <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.25rem">
-      <a href="/admin/queues" style="color:#60a5fa;text-decoration:none;font-size:.9rem">📊 Bull Board Queue Dashboard →</a>
       <a href="/health" style="color:#60a5fa;text-decoration:none;font-size:.9rem">❤️ Health Check →</a>
       <a href="/stats" style="color:#60a5fa;text-decoration:none;font-size:.9rem">📈 Raw Stats JSON →</a>
     </div>
