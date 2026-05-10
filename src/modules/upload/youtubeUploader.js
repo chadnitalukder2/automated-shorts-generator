@@ -33,7 +33,14 @@ function getOAuth2Client() {
  * @param {string} params.jobId
  * @returns {Promise<{videoId: string, url: string}>}
  */
-async function uploadToYoutube({ videoPath, title, description, hashtags, thumbnailText, jobId }) {
+// YouTube category IDs: 17 = Sports, 28 = Science & Technology
+const YOUTUBE_CATEGORY = { sports: '17', ai: '28' };
+const BASE_TAGS = {
+  sports: ['cricket', 'cricketshorts', 'shorts', 'cricketlovers'],
+  ai:     ['ai', 'artificialintelligence', 'shorts', 'tech', 'technology'],
+};
+
+async function uploadToYoutube({ videoPath, title, description, hashtags, thumbnailText, jobId, category = 'sports' }) {
   if (!config.youtube.uploadEnabled) {
     logger.warn('YouTube upload disabled (UPLOAD_ENABLED=false)', { jobId });
     return { videoId: null, url: null, skipped: true };
@@ -48,16 +55,13 @@ async function uploadToYoutube({ videoPath, title, description, hashtags, thumbn
     const youtube = google.youtube({ version: 'v3', auth });
 
     const tags = [
-      'cricket',
-      'cricketshorts',
-      'shorts',
-      'cricketlovers',
+      ...(BASE_TAGS[category] || BASE_TAGS.sports),
       ...hashtags.map((t) => t.replace('#', '')),
     ].slice(0, 30); // YouTube max 30 tags
 
-    // Build description with hashtags for Shorts discovery
     const hashtagLine = hashtags.map((t) => (t.startsWith('#') ? t : `#${t}`)).join(' ');
-    const fullDescription = `${description}\n\n${hashtagLine}\n\n#Shorts #Cricket`;
+    const categoryHashtag = category === 'ai' ? '#AI #Tech' : '#Cricket';
+    const fullDescription = `${description}\n\n${hashtagLine}\n\n#Shorts ${categoryHashtag}`;
 
     const fileSize = (await fs.stat(videoPath)).size;
 
@@ -68,7 +72,7 @@ async function uploadToYoutube({ videoPath, title, description, hashtags, thumbn
           title: title.slice(0, 100), // YouTube title max 100 chars
           description: fullDescription.slice(0, 5000),
           tags,
-          categoryId: '17', // Sports
+          categoryId: YOUTUBE_CATEGORY[category] || '17',
           defaultLanguage: 'en',
         },
         status: {

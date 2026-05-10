@@ -64,9 +64,20 @@ const config = {
   },
 
   shorts: {
-    channelName: optional('CHANNEL_NAME', 'CricketViralShorts'),
-    maxDailyUploads: parseInt(optional('MAX_DAILY_UPLOADS', '3'), 10),
-    cronSchedule: optional('CRON_SCHEDULE', '0 8,14,20 * * *'),
+    channelName: optional('CHANNEL_NAME', 'ViralShorts'),
+    // Legacy single-schedule (kept for backwards compat)
+    maxDailyUploads: parseInt(optional('MAX_DAILY_UPLOADS', '2'), 10),
+    cronSchedule: optional('CRON_SCHEDULE', '0 8,20 * * *'),
+    categories: {
+      sports: {
+        cronSchedule: optional('SPORTS_CRON_SCHEDULE', '0 8,20 * * *'),
+        maxDailyUploads: parseInt(optional('SPORTS_MAX_DAILY', '2'), 10),
+      },
+      ai: {
+        cronSchedule: optional('AI_CRON_SCHEDULE', '0 11,17 * * *'),
+        maxDailyUploads: parseInt(optional('AI_MAX_DAILY', '2'), 10),
+      },
+    },
   },
 
   output: {

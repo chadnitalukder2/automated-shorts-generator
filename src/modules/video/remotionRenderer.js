@@ -63,6 +63,8 @@ async function renderVideo(props, outputDir, durationSeconds, jobId) {
       chromiumOptions: {
         disableWebSecurity: true,
         headless: true,
+        // Required for Railway / Docker / Linux containers (no sandbox)
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
       },
       onProgress: ({ progress }) => {
         const pct = Math.round(progress * 100);

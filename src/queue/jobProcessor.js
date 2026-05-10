@@ -1,7 +1,7 @@
 'use strict';
 
 const { v4: uuidv4 } = require('uuid');
-const { fetchTrendingNews, selectBestArticle } = require('../modules/news/cricketNews');
+const { fetchNews } = require('../modules/news/newsRouter');
 const { generateScript, estimateDurationSeconds } = require('../modules/script/scriptGenerator');
 const { generateAudio } = require('../modules/tts/edgeTts');
 const { generateSubtitles } = require('../modules/subtitles/subtitleGenerator');
@@ -17,7 +17,8 @@ const logger = require('../utils/logger');
  */
 async function processShortJob(job) {
   const jobId = job.id || uuidv4();
-  const log = (msg, meta = {}) => logger.info(msg, { jobId, ...meta });
+  const category = job.data?.category || 'sports';
+  const log = (msg, meta = {}) => logger.info(msg, { jobId, category, ...meta });
   const startTime = Date.now();
 
   log('Pipeline started');
@@ -26,17 +27,16 @@ async function processShortJob(job) {
   const outputDir = await createJobDir(jobId);
   await job.updateProgress(5);
 
-  // ── 2. Fetch cricket news ─────────────────────────────────────────────────
-  log('Step 1/7: Fetching trending cricket news');
-  const articles = await fetchTrendingNews(jobId);
-  const article = selectBestArticle(articles);
+  // ── 2. Fetch news ─────────────────────────────────────────────────────────
+  log(`Step 1/7: Fetching trending ${category} news`);
+  const article = await fetchNews(category, jobId);
   log(`Selected article: "${article.title}"`);
   await writeJson(jobPath(jobId, 'article.json'), article);
   await job.updateProgress(15);
 
   // ── 3. Generate AI script ─────────────────────────────────────────────────
   log('Step 2/7: Generating AI script');
-  const script = await generateScript(article, jobId);
+  const script = await generateScript(article, jobId, category);
   await writeJson(jobPath(jobId, 'script.json'), script);
   await job.updateProgress(25);
 
@@ -90,6 +90,7 @@ async function processShortJob(job) {
     hashtags: script.hashtags,
     thumbnailText: script.thumbnailText,
     jobId,
+    category,
   });
   await job.updateProgress(100);
 

@@ -38,7 +38,10 @@ async function main() {
 
   // Dashboard
   app.get('/', (req, res) => {
-    const schedule = config.shorts.cronSchedule;
+    const sportsCron = config.shorts.categories.sports.cronSchedule;
+    const aiCron     = config.shorts.categories.ai.cronSchedule;
+    const sportsMax  = config.shorts.categories.sports.maxDailyUploads;
+    const aiMax      = config.shorts.categories.ai.maxDailyUploads;
     res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,22 +56,24 @@ async function main() {
   .card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:1.25rem}
   .card h2{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:.75rem}
   .stat{font-size:2rem;font-weight:700;color:#fff}
-  .stat.green{color:#22c55e}
-  .stat.yellow{color:#eab308}
-  .stat.red{color:#ef4444}
   .schedule-list{list-style:none}
-  .schedule-list li{padding:.5rem 0;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center;font-size:.9rem}
+  .schedule-list li{padding:.5rem 0;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center;font-size:.875rem}
   .schedule-list li:last-child{border-bottom:none}
-  .badge{font-size:.7rem;padding:.2rem .5rem;border-radius:999px;background:#22c55e22;color:#22c55e;font-weight:600}
+  .badge{font-size:.7rem;padding:.2rem .5rem;border-radius:999px;font-weight:600}
+  .badge.sports{background:#22c55e22;color:#22c55e}
+  .badge.ai{background:#a855f722;color:#c084fc}
   .badge.next{background:#3b82f622;color:#60a5fa}
   .label{color:#888;font-size:.8rem;margin-top:.25rem}
   .refresh{font-size:.75rem;color:#555;margin-top:1.5rem;text-align:right}
   .channel{color:#60a5fa;font-size:1rem;font-weight:600;margin-bottom:1.5rem}
+  .pill{display:inline-block;font-size:.7rem;padding:.15rem .5rem;border-radius:999px;font-weight:700;margin-left:.4rem;vertical-align:middle}
+  .pill-sports{background:#22c55e22;color:#22c55e}
+  .pill-ai{background:#a855f722;color:#c084fc}
 </style>
 </head>
 <body>
 <h1>🎬 Shorts Generator</h1>
-<div class="channel" id="channel">${config.shorts.channelName}</div>
+<div class="channel">${config.shorts.channelName}</div>
 <div class="grid">
   <div class="card">
     <h2>Queue</h2>
@@ -82,16 +87,25 @@ async function main() {
   </div>
   <div class="card">
     <h2>Daily Uploads</h2>
-    <div class="stat">${config.shorts.maxDailyUploads}</div>
-    <div class="label">max per day</div>
+    <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:.25rem">
+      <div>
+        <span style="font-size:1.5rem;font-weight:700;color:#22c55e">${sportsMax}</span>
+        <span class="pill pill-sports">Sports</span>
+        <div class="label">per day · <code style="color:#a78bfa">${sportsCron}</code> UTC</div>
+      </div>
+      <div>
+        <span style="font-size:1.5rem;font-weight:700;color:#c084fc">${aiMax}</span>
+        <span class="pill pill-ai">AI / Tech</span>
+        <div class="label">per day · <code style="color:#a78bfa">${aiCron}</code> UTC</div>
+      </div>
+    </div>
     <div style="margin-top:.75rem;font-size:.85rem;color:${config.youtube.uploadEnabled ? '#22c55e' : '#ef4444'}">
       Upload ${config.youtube.uploadEnabled ? '✓ enabled' : '✗ disabled'}
     </div>
   </div>
   <div class="card">
-    <h2>Next Scheduled Videos (your local time)</h2>
+    <h2>Upcoming Videos (your local time)</h2>
     <ul class="schedule-list" id="schedule-list"><li>Calculating...</li></ul>
-    <div class="label" style="margin-top:.5rem">Schedule: <code style="color:#a78bfa">${schedule}</code> UTC</div>
   </div>
 </div>
 <div class="grid">
@@ -107,14 +121,12 @@ async function main() {
 <div class="refresh">Auto-refreshes every 30s · Last updated: <span id="updated">—</span></div>
 <script>
   function parseCronHours(expr) {
-    // Parse "0 8,14,20 * * *" → [8, 14, 20]
     const parts = expr.trim().split(/\\s+/);
     if (parts.length < 2) return [];
-    const hourPart = parts[1];
-    return hourPart.split(',').map(Number).filter(n => !isNaN(n)).sort((a,b) => a-b);
+    return parts[1].split(',').map(Number).filter(n => !isNaN(n)).sort((a,b) => a-b);
   }
 
-  function getNextScheduled(cronExpr, count) {
+  function getNextScheduled(cronExpr, label, count) {
     const hours = parseCronHours(cronExpr);
     if (!hours.length) return [];
     const results = [];
@@ -124,7 +136,7 @@ async function main() {
     while (results.length < count) {
       for (const h of hours) {
         const t = new Date(todayUTC.getTime() + dayOffset * 86400000 + h * 3600000);
-        if (t > now) results.push(t);
+        if (t > now) results.push({ t, label });
         if (results.length >= count) break;
       }
       dayOffset++;
@@ -138,11 +150,16 @@ async function main() {
   }
 
   function renderSchedule() {
-    const cronExpr = '${schedule.replace(/"/g, '')}';
-    const times = getNextScheduled(cronExpr, 5);
+    const sportsCron = '${sportsCron.replace(/"/g, '')}';
+    const aiCron = '${aiCron.replace(/"/g, '')}';
+    const sports = getNextScheduled(sportsCron, 'sports', 3);
+    const ai = getNextScheduled(aiCron, 'ai', 3);
+    const merged = [...sports, ...ai].sort((a, b) => a.t - b.t).slice(0, 6);
     const list = document.getElementById('schedule-list');
-    if (!times.length) { list.innerHTML = '<li>Could not parse schedule</li>'; return; }
-    list.innerHTML = times.map((t,i) => \`<li><span>\${fmt(t)}</span><span class="badge \${i===0?'next':''}">\${i===0?'next':''}</span></li>\`).join('');
+    if (!merged.length) { list.innerHTML = '<li>Could not parse schedule</li>'; return; }
+    list.innerHTML = merged.map((item, i) =>
+      \`<li><span>\${fmt(item.t)}</span><span class="badge \${item.label}\${i===0?' next':''}">\${item.label}\${i===0?' · next':''}</span></li>\`
+    ).join('');
   }
 
   async function fetchStats() {
@@ -178,11 +195,14 @@ async function main() {
   });
 
   // Manually trigger a shorts generation
+  // Body: { category: 'sports' | 'ai' }  (default: 'sports')
   app.post('/generate', async (req, res) => {
     try {
+      const category = ['sports', 'ai'].includes(req.body?.category) ? req.body.category : 'sports';
       const job = await addShortsJob({
         triggeredBy: 'api',
         ...req.body,
+        category,
       });
       logger.info(`API triggered job: ${job.id}`);
       res.status(202).json({ jobId: job.id, status: 'queued' });
