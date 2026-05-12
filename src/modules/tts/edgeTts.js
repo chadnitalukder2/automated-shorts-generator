@@ -16,7 +16,7 @@ async function generateAudio(text, outputDir, jobId) {
   try {
     return await generateEdgeTTS(text, outputDir, jobId);
   } catch (err) {
-    logger.warn(`Edge TTS failed (${err.message || err}) — using system TTS fallback`, { jobId });
+    logger.error(`Edge TTS failed (${err.message || err}) — falling back to system TTS (quality will be poor)`, { jobId });
     return generateSystemTTS(text, outputDir, jobId);
   }
 }
@@ -31,7 +31,7 @@ async function generateEdgeTTS(text, outputDir, jobId) {
 
     await tts.setMetadata(
       config.tts.voice,
-      OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3
+      OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3
     );
 
     const ssml = buildSSML(text);

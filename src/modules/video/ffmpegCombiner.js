@@ -27,7 +27,7 @@ async function combineMedia({ videoPath, audioPath, subtitlesPath, outputDir, jo
           '-preset fast',
           '-crf 22',
           '-c:a aac',
-          '-b:a 192k',
+          '-b:a 256k',
           '-shortest',
           '-movflags +faststart',
           '-pix_fmt yuv420p',
